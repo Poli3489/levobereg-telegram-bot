@@ -1,0 +1,3 @@
+pyTelegramBotAPI
+Python-dotent
+Flask
