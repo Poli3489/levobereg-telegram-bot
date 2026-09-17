@@ -1,0 +1,51 @@
+import os
+import threading
+import telebot
+from flask import Flask
+from dotenv import load_dotenv
+
+@app.route('/')
+@app.route('/health')
+def health_check():
+    return "Bot is running", 200
+
+# Твой код для приветствия нового участника
+@bot.message_handler(content_types=['new_chat_members'])
+def greet_new_member(message):
+    
+# Функция, которая удаляет сообщение через заданное время
+def delete_message_later(chat_id, message_id, delay):
+    time.sleep(delay)
+    try:
+        bot.delete_message(chat_id, message_id)
+        print("Приветственное сообщение удалено.")
+    except Exception as e:
+        print(f"Не удалось удалить: {e}")
+
+# Реакция на нового участника
+@bot.message_handler(content_types=['new_chat_members'])
+def greet_new_member(message):
+    for member in message.new_chat_members:
+        # Формируем текст приветствия
+        text = f"Здравствуйте, {member.first_name}! 👋 \n \nВы зашли в чат жильцов ЖК Левобережье \nЭтот чат создан только для жильцов и арендаторов. Чтобы в чате не было спама и посторонних пользователей, необходимо пройти регистрацию @ZKLevoberegzhe_bot \n \nАккаунты не прошедшие регистрацию будут исключены из группы!"
+        
+        # Отправляем сообщение
+        sent_msg = bot.send_message(message.chat.id, text)
+        
+        # Запускаем таймер на удаление (60 секунд) в отдельном потоке
+        thread = threading.Thread(target=delete_message_later, args=(message.chat.id, sent_msg.message_id, 60))
+        thread.start()
+
+print("Бот запущен! Не закрывай это окно.")
+bot.polling(none_stop=True)
+def run_bot():
+    bot.polling(none_stop=True)
+
+if __name__ == '__main__':
+    bot_thread = threading.Thread(target=run_bot)
+    bot_thread.daemon = True
+    bot_thread.start()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
+
